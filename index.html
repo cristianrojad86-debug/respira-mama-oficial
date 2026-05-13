@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Respira, Mamá - App Móvil</title>
+    <!-- Fuentes Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-app: #FDFCF8; 
+            --text-dark: #2C2C2C;
+            --text-light: #7A6F68;
+            --white: #FFFFFF;
+
+            /* Colores Base Brillantes */
+            --mustard-light: #FFEECB;
+            --mustard-dark: #E68A00;
+            --coral-light: #FFE0DA;
+            --coral-dark: #E03E26;
+            --forest-light: #D5EBE1;
+            --forest-dark: #125C3E;
+
+            /* Degradados Mágicos */
+            --grad-mustard: linear-gradient(135deg, #FFC043 0%, #FF8A00 100%);
+            --grad-coral: linear-gradient(135deg, #FF6B54 0%, #D83119 100%);
+            --grad-forest: linear-gradient(135deg, #32B381 0%, #176B49 100%);
+
+            /* Variables Dinámicas */
+            --theme-grad: var(--grad-coral);
+            --theme-color: var(--coral-dark);
+            --theme-light: var(--coral-light);
+            --theme-shadow: rgba(255, 107, 84, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: #D3CEC4; 
+            display: flex;
+            justify-content: center;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 430px; 
+            height: 100%;
+            background-color: var(--bg-app);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================================
+           NAVEGACIÓN (HEADER)
+           ========================================= */
+        #top-bar {
+            height: 60px;
+            background: rgba(253, 252, 248, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        #top-bar.visible { transform: translateY(0); }
+        
+        .back-btn {
+            font-size: 20px; color: var(--theme-color);
+            background: none; border: none; padding: 10px;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            font-family: 'Nunito'; font-weight: 800;
+            transition: color 0.3s;
+        }
+        
+        /* Botón de Favorito */
+        .fav-btn {
+            margin-left: auto;
+            background: none; border: none; font-size: 24px;
+            color: #ccc; cursor: pointer; transition: 0.3s;
+            display: none; /* Se muestra solo en receta */
+        }
+        .fav-btn.active { color: var(--coral-dark); animation: heartPop 0.4s ease; }
+        @keyframes heartPop { 0% {transform: scale(1);} 50% {transform: scale(1.4);} 100% {transform: scale(1);} }
+
+        /* =========================================
+           VISTAS DE LA APP
+           ========================================= */
+        .view {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            background-color: var(--bg-app);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding-bottom: 40px;
+        }
+        .view.hidden-right { transform: translateX(100%); }
+        .view.hidden-left { transform: translateX(-100%); }
+        .view.active { transform: translateX(0); z-index: 10; }
+        .view::-webkit-scrollbar { display: none; }
+        
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* =========================================
+           HOME VIEW (PORTADA)
+           ========================================= */
+        .cover-header {
+            height: 60vh;
+            background: linear-gradient(180deg, rgba(23, 107, 73, 0.1) 0%, rgba(23, 107, 73, 0.95) 100%), url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 30px 25px; color: var(--white);
+        }
+        .badge { background: var(--grad-mustard); color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; align-self: flex-start; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(255,138,0,0.3); }
+        .cover-header h1 { font-size: 55px; line-height: 1; margin-bottom: 10px; text-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .cover-header p { font-size: 16px; opacity: 0.95; font-weight: 600; line-height: 1.4; }
+
+        /* Sección de Favoritos (Horizontal Scroll) */
+        .favorites-section { display: none; padding: 30px 0 10px 0; }
+        .favorites-section.show { display: block; }
+        .sec-title { font-size: 22px; color: var(--coral-dark); padding: 0 25px; margin-bottom: 15px; }
+        .fav-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 5px 25px 20px 25px; scroll-snap-type: x mandatory; }
+        .fav-scroll::-webkit-scrollbar { display: none; }
+        .fav-card { min-width: 140px; background: white; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); scroll-snap-align: start; cursor: pointer; border: 1px solid rgba(0,0,0,0.02); }
+        .fav-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; margin-bottom: 10px; }
+        .fav-card h4 { font-size: 14px; font-family: 'Nunito'; font-weight: 800; line-height: 1.2; color: var(--text-dark); }
+
+        .modules-menu { padding: 30px 25px 40px 25px; display: flex; flex-direction: column; gap: 18px; }
+        .mod-card {
+            background: var(--white); border-radius: 22px; padding: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 18px;
+            cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.02);
+        }
+        .mod-card:active { transform: scale(0.96); }
+        .mod-icon { width: 65px; height: 65px; border-radius: 18px; display: flex; justify-content: center; align-items: center; font-size: 26px; color: var(--white); flex-shrink: 0; }
+        
+        .mod-1 .mod-icon { background: var(--grad-mustard); box-shadow: 0 6px 15px rgba(255, 138, 0, 0.3); }
+        .mod-2 .mod-icon { background: var(--grad-coral); box-shadow: 0 6px 15px rgba(216, 49, 25, 0.3); }
+        .mod-3 .mod-icon { background: var(--grad-forest); box-shadow: 0 6px 15px rgba(23, 107, 73, 0.3); }
+        
+        .mod-info h3 { font-size: 19px; margin-bottom: 4px; color: var(--text-dark); }
+        .mod-info p { font-size: 14px; color: var(--text-light); margin: 0; font-family: 'Nunito'; }
+
+        /* =========================================
+           MODULE VIEW (LISTA DE RECETAS)
+           ========================================= */
+        .mod-header { padding: 80px 25px 35px 25px; color: var(--white); border-radius: 0 0 45px 45px; margin-bottom: 25px; box-shadow: 0 10px 30px var(--theme-shadow); transition: background 0.4s; }
+        .mod-header h1 { font-size: 42px; margin-bottom: 10px; }
+        .mod-header p { font-size: 15px; line-height: 1.5; opacity: 0.95; font-weight: 600; }
+
+        .recipe-list { padding: 0 20px; display: flex; flex-direction: column; gap: 18px; }
+        .recipe-item {
+            background: var(--white); border-radius: 20px; overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.04); display: flex; min-height: 115px;
+            cursor: pointer; transition: transform 0.2s; border: 1px solid rgba(0,0,0,0.02);
+        }
+        .recipe-item:active { transform: scale(0.97); }
+        
+        .recipe-icon-thumb { 
+            width: 105px; 
+            display: flex; justify-content: center; align-items: center;
+            font-size: 38px; color: rgba(255,255,255,0.9); flex-shrink: 0;
+            transition: background 0.4s;
+        }
+        .recipe-icon-thumb i { text-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        
+        .recipe-item-info { padding: 15px 15px 15px 18px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .r-tag { font-size: 11px; font-weight: 800; color: var(--theme-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .recipe-item h3 { font-size: 17px; line-height: 1.2; margin-bottom: 8px; color: var(--text-dark); }
+        .r-time { font-size: 12px; color: var(--text-light); font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+        /* =========================================
+           RECIPE VIEW (DETALLE INTERACTIVO)
+           ========================================= */
+        .recipe-hero { width: 100%; height: 260px; position: relative; overflow: hidden; transition: background 0.4s; }
+        .hero-icon-bg { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; }
+        .hero-icon-bg i { font-size: 140px; color: rgba(255,255,255,0.25); animation: float 6s ease-in-out infinite; }
+        
+        @keyframes float { 0% { transform: translateY(0px) rotate(-10deg); } 50% { transform: translateY(-15px) rotate(-5deg); } 100% { transform: translateY(0px) rotate(-10deg); } }
+
+        .hero-decor-1 { position: absolute; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; top: -50px; right: -80px; z-index: 0; }
+        .hero-decor-2 { position: absolute; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; bottom: -40px; left: -20px; z-index: 0; }
+
+        .recipe-hero::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: linear-gradient(180deg, transparent 0%, var(--bg-app) 100%); z-index: 2; }
+        
+        .recipe-content { padding: 0 25px 40px 25px; position: relative; margin-top: -30px; z-index: 3; }
+        .recipe-content h1 { font-size: 40px; line-height: 1.1; margin-bottom: 15px; color: var(--theme-color); letter-spacing: -0.5px; transition: color 0.4s; }
+        .recipe-story { font-size: 16px; font-style: italic; color: var(--text-light); border-left: 4px solid var(--theme-color); padding-left: 15px; margin-bottom: 25px; line-height: 1.6; }
+        
+        .pills { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 35px; }
+        .pill { background: var(--theme-light); color: var(--theme-color); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
+
+        .section-title { font-size: 20px; font-weight: 800; color: var(--text-dark); margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .section-title i { color: var(--theme-color); font-size: 22px; }
+        
+        /* Barra de Progreso */
+        .progress-text { font-size: 13px; color: var(--text-light); font-weight: 700; background: var(--white); padding: 4px 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
+        .progress-bar-bg { width: 100%; height: 8px; background: #E8EDE6; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--theme-grad); width: 0%; transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* Ingredientes Interactivos */
+        .ingredients { background: var(--white); padding: 22px; border-radius: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.03); margin-bottom: 35px; border: 1px solid rgba(0,0,0,0.02); }
+        .ing-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px dashed #E8EDE6; cursor: pointer; }
+        .ing-item:last-child { border-bottom: none; }
+        .ing-checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2.5px solid var(--theme-color); display: flex; justify-content: center; align-items: center; color: transparent; transition: 0.2s; flex-shrink: 0; margin-top: 2px;}
+        .ing-item.checked .ing-checkbox { background: var(--theme-grad); border-color: transparent; color: white; transform: scale(1.1); }
+        .ing-text { font-size: 16.5px; color: var(--text-dark); transition: 0.2s; line-height: 1.4; font-weight: 600;}
+        .ing-item.checked .ing-text { text-decoration: line-through; color: var(--text-light); opacity: 0.5; }
+
+        /* Pasos Interactivos */
+        .steps { display: flex; flex-direction: column; gap: 20px; margin-bottom: 45px; }
+        .step-item { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); display: flex; gap: 16px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; }
+        .step-item:active { transform: scale(0.98); }
+        .step-num { width: 32px; height: 32px; background: var(--theme-grad); color: white; border-radius: 10px; font-family: 'Playfair Display'; font-weight: 800; display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 16px; box-shadow: 0 4px 10px var(--theme-shadow); transition: 0.3s;}
+        .step-text { font-size: 16.5px; line-height: 1.5; padding-top: 3px; color: var(--text-dark); transition: 0.3s;}
+        
+        /* Paso Completado */
+        .step-item.completed { border-color: #E8EDE6; background: #FAFAFA; box-shadow: none; }
+        .step-item.completed .step-num { background: #E8EDE6; color: var(--text-light); box-shadow: none; }
+        .step-item.completed .step-text { color: var(--text-light); text-decoration: line-through; opacity: 0.7;}
+
+        /* Botón Truco Interactivo */
+        .trick-btn { width: 100%; background: var(--theme-grad); color: white; border: none; padding: 20px; border-radius: 20px; font-size: 18px; font-weight: 800; font-family: 'Nunito'; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 10px 25px var(--theme-shadow); transition: transform 0.2s, background 0.4s; animation: pulseGlow 2s infinite; }
+        .trick-btn:active { transform: scale(0.97); }
+        
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 var(--theme-shadow); } 70% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
+
+        .trick-content { display: none; background: var(--text-dark); color: white; padding: 30px 25px; border-radius: 20px; margin-top: 20px; animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-top: 5px solid var(--theme-color); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+        .trick-content.show { display: block; }
+        .trick-content h3 { font-family: 'Caveat'; font-size: 34px; color: var(--theme-light); margin-bottom: 12px; font-weight: 400; letter-spacing: 1px;}
+        .trick-content p { font-size: 16.5px; line-height: 1.6; opacity: 0.95; }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <!-- BARRA NAVEGACIÓN SUPERIOR -->
+    <div id="top-bar">
+        <button class="back-btn" onclick="goBack()">
+            <i class="fa-solid fa-chevron-left"></i> <span id="back-text">Volver</span>
+        </button>
+        <button class="fav-btn" id="fav-btn" onclick="toggleFavorite()">
+            <i class="fa-solid fa-heart"></i>
+        </button>
+    </div>
+
+    <!-- VISTA 1: HOME -->
+    <div id="view-home" class="view active">
+        <div class="cover-header">
+            <span class="badge">App Exclusiva</span>
+            <h1>Respira,<br>Mamá.</h1>
+            <p>Nutrición, variedad y cero peleas en veinte minutos.</p>
+        </div>
+
+        <!-- Sección de Favoritos (Aparece dinámicamente) -->
+        <div class="favorites-section" id="fav-section">
+            <h3 class="sec-title">Tus Favoritas ❤️</h3>
+            <div class="fav-scroll" id="fav-container">
+                <!-- Se inyectan tarjetas de favoritos aquí -->
+            </div>
+        </div>
+
+        <div class="modules-menu">
+            <h3 style="font-size: 24px; color: var(--coral-dark); margin-bottom: 10px;">Tu Recetario</h3>
+            
+            <div class="mod-card mod-1" onclick="openModule(1)">
+                <div class="mod-icon"><i class="fa-solid fa-sun"></i></div>
+                <div class="mod-info">
+                    <h3>Desayunos</h3>
+                    <p>10 recetas que sí se comen.</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="margin-left:auto; color: #D3CEC4; font-size: 18px;"></i>
+            </div>
+
+            <div class="mod-card mod-2" onclick="openModule(2)">
+                <div class="mod-icon"><i class="fa-solid fa-utensils"></i></div>
+                <div class="mod-info">
+                    <h3>Almuerzos</h3>
+                    <p>15 recetas sin peleas.</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="margin-left:auto; color: #D3CEC4; font-size: 18px;"></i>
+            </div>
+
+            <div class="mod-card mod-3" onclick="openModule(3)">
+                <div class="mod-icon"><i class="fa-solid fa-moon"></i></div>
+                <div class="mod-info">
+                    <h3>Cenas</h3>
+                    <p>10 recetas para dormir en paz.</p>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="margin-left:auto; color: #D3CEC4; font-size: 18px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA 2: LISTA DEL MÓDULO -->
+    <div id="view-module" class="view hidden-right">
+        <div id="mod-header-dyn" class="mod-header">
+            <h1 id="mh-title">Título</h1>
+            <p id="mh-desc">Desc.</p>
+        </div>
+        <div class="recipe-list" id="recipe-list-container">
+            <!-- JS inyecta las tarjetas aquí -->
+        </div>
+    </div>
+
+    <!-- VISTA 3: RECETA DETALLE -->
+    <div id="view-recipe" class="view hidden-right">
+        <div class="recipe-hero" id="rec-hero-bg">
+            <div class="hero-decor-1"></div>
+            <div class="hero-decor-2"></div>
+            <!-- Icono decorativo -->
+        </div>
+        <div class="recipe-content">
+            <h1 id="rec-title">Título Receta</h1>
+            <p id="rec-story" class="recipe-story">Historia...</p>
+            
+            <div class="pills" id="rec-pills"></div>
+            
+            <div class="section-title">
+                <div><i class="fa-solid fa-basket-shopping"></i> Ingredientes</div>
+                <span class="progress-text" id="progress-text">0 / 0 listos</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="ingredients" id="rec-ingredients">
+                <!-- Checkboxes de ingredientes -->
+            </div>
+
+            <div class="section-title">
+                <div><i class="fa-solid fa-fire-burner"></i> Pasos a seguir</div>
+            </div>
+            <div class="steps" id="rec-steps">
+                <!-- Pasos interactivos -->
+            </div>
+
+            <button class="trick-btn" onclick="toggleTrick()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Revelar Truco Real
+            </button>
+            <div class="trick-content" id="rec-trick">
+                <h3>El Secreto</h3>
+                <p id="trick-text"></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- DATA Y LÓGICA DE LA APP -->
+<script>
+    // ESTILOS DINÁMICOS
+    const modVisuals = {
+        1: { grad: 'var(--grad-mustard)', color: 'var(--mustard-dark)', light: 'var(--mustard-light)', shadow: 'rgba(255, 138, 0, 0.3)', icon: 'fa-sun' },
+        2: { grad: 'var(--grad-coral)', color: 'var(--coral-dark)', light: 'var(--coral-light)', shadow: 'rgba(216, 49, 25, 0.3)', icon: 'fa-utensils' },
+        3: { grad: 'var(--grad-forest)', color: 'var(--forest-dark)', light: 'var(--forest-light)', shadow: 'rgba(23, 107, 73, 0.3)', icon: 'fa-moon' }
+    };
+
+    // BASE DE DATOS DE RECETAS
+    const db = {
+        m1: {
+            title: "Desayunos",
+            desc: "Opciones rápidas en rotación. Cero madrugadas extra.",
+            recipes: [
+                { id: 101, title: 'Pancakes verdes de "Hulk"', time: "10 min", tag: "Licuadora", ic: "fa-leaf", mod: 1, req: ["1 banano muy maduro", "1 taza avena hojuelas", "Puñado espinaca fresca", "1 huevo", "½ taza leche", "Chorrito vainilla"], steps: ["Todo a licuadora hasta quedar verde parejo.", "Sartén fuego medio con mantequilla.", "Vierte círculos pequeños (tamaño galleta).", "Al salir burbujas, voltea. Un minuto más."], trick: "Hazlos pequeños. Un pancake pequeño que terminan se siente mejor que uno grande a medias.", story: "Mi hijo los miró raro. Le dije que eran de su superhéroe. Se comió todos." },
+                { id: 102, title: 'Arepitas de zanahoria', time: "15 min", tag: "Clásico", ic: "fa-carrot", mod: 1, req: ["1 taza harina maíz", "1 taza agua tibia", "½ taza zanahoria rallada fina", "½ taza queso rallado", "Sal, 1 cdta mantequilla"], steps: ["Mezcla agua con sal y mantequilla. Agrega harina.", "Cuando esté suave, mete zanahoria y queso. Amasa.", "Forma bolitas y aplasta.", "Asa en sartén hasta que el queso haga costra."], trick: "Ralla zanahoria muy fina. Si hay trozos grandes, algunos niños los separan.", story: "El color naranja les llama la atención y el queso convence." },
+                { id: 103, title: 'Batido "Superhéroe"', time: "5 min", tag: "Un Vaso", ic: "fa-bolt", mod: 1, req: ["1 banano (mejor congelado)", "1 taza leche", "2 cdas avena", "1 cdta crema de maní", "Opcional: 1 cdta cacao puro"], steps: ["Todo a licuadora 1 minuto a máxima velocidad.", "Sirve en vaso favorito o termo."], trick: "Congela bananos maduros en bolsas. Cuando están negros afuera son más dulces.", story: "Hay mañanas que no hay mañana. Este batido salva el día en 5 min." },
+                { id: 104, title: 'Huevos cremosos secretos', time: "10 min", tag: "Sartén", ic: "fa-egg", mod: 1, req: ["2 huevos", "2 cdas puré ahuyama o coliflor fina", "Chorrito leche, Queso", "Sal, mantequilla"], steps: ["Bate huevos con leche y puré.", "Mantequilla en sartén a fuego bajito de verdad.", "Echa mezcla y revuelve suave.", "Pon queso encima y espera que derrita."], trick: "Fuego bajo es el secreto. Apurados quedan secos y los rechazan.", story: "Tenía puré de ahuyama sobrando. Quedaron tan cremosos que pidieron más." },
+                { id: 105, title: 'Muffins huevo de domingo', time: "25 min", tag: "Horno", ic: "fa-calendar", mod: 1, req: ["4 huevos, ¼ taza leche", "½ taza jamón picado", "½ taza queso rallado, Sal"], steps: ["Horno 180°C. Bate huevos con leche, jamón y queso.", "Engrasa molde cupcakes. Llena hasta mitad.", "Hornea 15-20 min hasta inflar.", "Enfría y guarda. Calienta 15s en mañana."], trick: "No llenes mucho. Inflan bastante y si derraman arruinan el molde.", story: "Los hago el domingo viendo tv. El lunes deja de ser el lunes." },
+                { id: 106, title: 'Avena manzana canela', time: "10 min", tag: "Olla", ic: "fa-apple-whole", mod: 1, req: ["½ taza avena, 1 taza leche", "½ manzana en cuadritos", "Pizca canela", "Miel (opcional)"], steps: ["En ollita pon leche, avena, manzana y canela.", "Revuelve siempre a fuego medio.", "En 5-7 min espesa. Apaga y sirve."], trick: "Sirve en plato hondo con canela extra encima. Comen mejor lo que se ve bonito.", story: "Olor que calma niños. Manzana y canela hacen algo mágico." },
+                { id: 107, title: 'Tostadas francesas de martes', time: "10 min", tag: "Sartén", ic: "fa-bread-slice", mod: 1, req: ["2 tajadas pan", "1 huevo, Chorrito leche", "Pizca canela, vainilla", "Mantequilla"], steps: ["Bate huevo con leche, canela, vainilla.", "Pasa tajadas empapando por ambos lados.", "Dora en sartén 2 min por lado.", "Corta en tiras para comer con la mano."], trick: "La vainilla hace que huela tan bien que atrae a la cocina solos.", story: "Para que el desayuno se sienta especial sin ser fin de semana." },
+                { id: 108, title: 'Waffles de ahuyama', time: "15 min", tag: "Sin Azúcar", ic: "fa-stroopwafel", mod: 1, req: ["1 taza harina avena", "½ taza puré ahuyama", "1 huevo, ½ taza leche", "1 cdta polvo hornear"], steps: ["Mezcla todo o licúa.", "Engrasa wafflera y vierte masa.", "Espera a que doren bien antes de sacarlos."], trick: "Puré hecho el finde sirve para esto, sopas y huevos. Una cocción, tres usos.", story: "Ahuyama da dulzura natural y color curioso. Se sorprenden al saber qué es." },
+                { id: 109, title: 'El vasito por capas', time: "5 min", tag: "Visual", ic: "fa-glass-water", mod: 1, req: ["1 taza yogur griego sin azúcar", "Fruta picada", "2 cdas granola", "Miel"], steps: ["Fondo del vaso: capa de yogur.", "Capa de fruta.", "Capa de yogur, luego granola.", "Repite hasta llenar. Hilito de miel."], trick: "Vaso transparente obligatorio. En plato no se ven las capas y pierde magia.", story: "Para los que comen con los ojos. Parece postre y no lo es." },
+                { id: 110, title: 'Galletas banano y avena', time: "20 min", tag: "Horno", ic: "fa-cookie", mod: 1, req: ["2 bananos maduros (negros)", "1 taza avena hojuelas", "1 cda chips chocolate o pasas"], steps: ["Aplasta bananos hasta puré sin grumos.", "Agrega avena y chips. Mezcla.", "En bandeja, pon cucharadas dándoles forma.", "Horno 180°C por 15 min."], trick: "Entre más maduro, más dulce sin azúcar extra.", story: "Hijo comió cuatro de una sentada. Ahora hago siempre." }
+            ]
+        },
+        m2: {
+            title: "Almuerzos",
+            desc: "Renuncié a las ensaladas perfectas. Ninguno toma más de media hora.",
+            recipes: [
+                { id: 201, title: 'Nuggets caseros (no de caja)', time: "25 min", tag: "Congelables", ic: "fa-drumstick-bite", mod: 2, req: ["1 pechuga pollo en trozos", "½ zanahoria rallada fina", "½ taza avena triturada", "1 huevo batido, Sal, ajo polvo"], steps: ["Procesa pollo, zanahoria y sal hasta pasta.", "Mójate manos y forma nuggets.", "Pasa por huevo y luego avena.", "Hornea 200°C por 15 min en bandeja engrasada."], trick: "Domingo haz el doble. Congélalos crudos empanizados. Salvan emergencias.", story: "Lloré leyendo ingredientes de caja. En horno se hacen solos." },
+                { id: 202, title: 'Pasta con "salsa mágica"', time: "20 min", tag: "Licuadora", ic: "fa-plate-wheat", mod: 2, req: ["2 tazas pasta corta", "2 tomates maduros", "½ pimentón rojo sin semillas", "½ zanahoria o trozo ahuyama", "1 cda aceite oliva, sal"], steps: ["Cocina pasta normal.", "Hierve tomate, pimentón y zanahoria hasta ablandar.", "Licúa verduras con aceite, sal y agua de cocción.", "Mezcla salsa caliente con pasta."], trick: "El pimentón rojo es el secreto. Da el tono de 'salsa de paquete'.", story: "Modo supervivencia. Conté que era salsa pizzería. Limpiaron el plato." },
+                { id: 203, title: 'Mini hamburguesas lentejas', time: "20 min", tag: "Sartén", ic: "fa-burger", mod: 2, req: ["½ libra carne molida", "½ taza lentejas cocidas (sin caldo)", "1 diente ajo machacado", "Sal, aceite"], steps: ["Aplasta lentejas con tenedor a puré rústico.", "Mezcla con carne cruda, ajo y sal amasando bien.", "Forma bolitas pequeñas y aplástalas.", "Dora en sartén caliente 4 minutos por lado."], trick: "Tamaño mini es magia. Lo pequeño que se agarra con la mano tiene éxito.", story: "Sirví sopa lentejas y me miraron feo. Hice hamburguesas y pidieron más." },
+                { id: 204, title: 'Albóndigas en calabaza', time: "25 min", tag: "Olla", ic: "fa-circle", mod: 2, req: ["1 libra pollo molido", "2 cdas avena o pan rallado", "1 taza puré ahuyama, ½ taza leche", "Queso parmesano"], steps: ["Mezcla pollo, avena y sal. Forma albóndigas.", "Sella en sartén un par de minutos.", "Licúa puré con leche y vierte sobre albóndigas.", "Tapa a fuego muy bajo 10 min. Tira queso encima."], trick: "Mójate manos con aceite antes de armar. El pollo molido se pega a los dedos.", story: "Comida redonda sabe mejor. Textura suave no da pereza masticar." },
+                { id: 205, title: 'Deditos pescado sin olor', time: "20 min", tag: "Horno", ic: "fa-fish", mod: 2, req: ["1 filete pescado blanco (tilapia)", "1 huevo, 3 cdas avena molida", "2 cdas coco rallado seco", "Sal y limón"], steps: ["Corta filete en tiras y pon gotas limón con sal.", "Bate huevo. Mezcla avena con coco.", "Pasa tiras por huevo y mezcla seca.", "Hornea 200°C por 12-15 min."], trick: "El limón crudo antes de apanar corta olor fuerte a mar que hace rechazar pescado.", story: "Pescado arruga nariz. Apanado coco y avena cambia olor. Juran es pollo." },
+                { id: 206, title: 'Arroz chaufa camuflado', time: "15 min", tag: "Wok", ic: "fa-bowl-rice", mod: 2, req: ["2 tazas arroz (frío de nevera)", "1 huevo, ½ taza pollo/jamón", "¼ taza arvejas, ¼ taza polvo brócoli", "1 cda salsa soya"], steps: ["Wok con aceite, haz huevo revuelto rápido y saca.", "Dora pollo y polvo brócoli 3 min.", "Echa arroz frío y arvejas, revuelve fuerte.", "Agrega soya y huevo, mezcla 2 min y sirve."], trick: "Arroz debe ser del día anterior y frío. Recién hecho queda pegotudo.", story: "Cortando microscópicamente. Brócoli tamaño arroz no existe para ellos." },
+                { id: 207, title: 'Croquetas atún y papa', time: "25 min", tag: "Rendidor", ic: "fa-coins", mod: 2, req: ["2 papas medianas cocidas", "1 lata atún en agua (escurrida)", "1 huevo, Pan rallado", "Sal, perejil"], steps: ["Haz puré las papas. Mezcla con atún.", "Arma cilindros, pasa por huevo y pan rallado.", "Dora en sartén con dedito aceite."], trick: "Escurre atún hasta la última gota. Húmedo, se desarman croquetas.", story: "Despensa vacía, solo papas, atún y fe. Llenan muchísimo." },
+                { id: 208, title: 'Canelones jamón espinaca', time: "15 min", tag: "Horno", ic: "fa-bacon", mod: 2, req: ["6 tajadas jamón pavo", "1 taza espinaca muy fina", "½ taza queso crema", "Salsa tomate, Queso gratinar"], steps: ["Revuelve espinaca con queso crema.", "Pon cucharada en borde jamón y enrolla en tubo.", "En refractaria, baña en salsa y queso.", "Horno hasta burbujear."], trick: "Picar espinaca chiquita con queso untable quita textura hoja mojada.", story: "Usar jamón como pasta: rellena, enrolla y queso derretido hace su trabajo." },
+                { id: 209, title: 'La falsa pizza de avena', time: "20 min", tag: "Sartén", ic: "fa-pizza-slice", mod: 2, req: ["1 taza harina avena, 1 huevo, chorrito agua", "Salsa tomate, Queso mozzarella", "Toppings: pollo, maíz"], steps: ["Mezcla avena, huevo, agua hasta masa estirable.", "Sartén fuego bajo, extiende como arepa delgada.", "Dora un lado, voltea. Pon salsa, queso, toppings.", "Tapa sartén 2 minutos."], trick: "Tuesta masa por AMBOS lados antes de toppings. Humedad daña cruda.", story: "Preparo base 5 min. Queda crujiente, sostiene queso y no cae pesada." },
+                { id: 210, title: 'Tacos suaves de pollo', time: "15 min", tag: "Interactivo", ic: "fa-hands", mod: 2, req: ["Tortillas pequeñas", "1 taza pollo desmechado", "Aguacate espichado, Tomate picado, Limón"], steps: ["Calienta tortillas y pollo.", "Aplasta aguacate con limón y sal.", "En mesa envases separados. Que armen untando aguacate primero."], trick: "Aguacate funciona como pegante natural. Si va de base, pollo no se sale.", story: "Poner separados en centro. Meterle tomate se vuelve su decisión." },
+                { id: 211, title: 'Mac & Cheese naranja', time: "20 min", tag: "Olla", ic: "fa-cheese", mod: 2, req: ["2 tazas coditos", "1 taza puré ahuyama espeso, ½ taza leche", "¼ taza queso cheddar/amarillo", "Ajo polvo, sal"], steps: ["Cocina pasta y escurre.", "Calienta puré, leche, ajo sin hervir fuerte.", "Agrega queso, revuelve hasta salsa lisa.", "Mezcla con coditos calientes."], trick: "Pizquita de ajo polvo da sabor 'paquete' que los vuelve locos.", story: "Color de caja no viene de queso. Repliqué textura con ahuyama." },
+                { id: 212, title: 'Pastelito carne con puré', time: "30 min", tag: "Horno", ic: "fa-cloud", mod: 2, req: ["1 libra carne molida, 1 huevo", "½ cebolla rallada fina", "2 tazas puré batata/papa, Queso"], steps: ["Aliña carne con cebolla, huevo y sal. Aplasta en refractaria y hornea 15 min.", "Saca y BOTA líquido soltó.", "Cubre con puré y esparce queso.", "Horno 10 min más hasta dorar."], trick: "Botar líquido de la primera cocción. Si lo dejas, puré se vuelve sopa.", story: "Hijo no masticaba carne. Pastel al horno deshace sola." },
+                { id: 213, title: 'Sopa roja y sándwich', time: "20 min", tag: "Combo", ic: "fa-mug-hot", mod: 2, req: ["3 tomates maduros (sin piel), 1 zanahoria", "1 cda mantequilla, 1 taza caldo pollo", "Pan y queso sándwich"], steps: ["Cocina tomate y zanahoria en caldo hasta deshacerse.", "Pasa a licuadora, añade mantequilla cruda. Licúa.", "Haz sándwich plancha, corta cuadritos para sopa."], trick: "Mantequilla cruda a licuadora emulsiona sopa y baja acidez al instante.", story: "Tardes oscuras. Sándwich en cuadritos como barquitos es un juego." },
+                { id: 214, title: 'Wrap enrollado para carro', time: "10 min", tag: "Rápido", ic: "fa-car", mod: 2, req: ["2 tortillas grandes wrap", "2 cdas hummus (o queso crema)", "Pollo desmechado, 1 hoja lechuga entera"], steps: ["Unta tortilla con hummus.", "Pon hoja lechuga plana encima.", "Agrega pollo, enrolla apretando fuerte y corta diagonal."], trick: "Lechuga entera sin picar actúa como barrera del relleno. No ensucian carro.", story: "Íbamos tarde a natación. Comidos en trayecto sin ensuciar." },
+                { id: 215, title: 'Guiso pollo y garbanzos', time: "25 min", tag: "Oculto", ic: "fa-seedling", mod: 2, req: ["1 taza garbanzos blanditos", "½ pechuga cuadros", "Cebolla y tomate picados, Color/Azafrán"], steps: ["Sofríe pollo, cebolla, tomate, color.", "Agrega garbanzos y vaso agua. Hierve 5 min.", "Saca MITAD de todo y licúalo.", "Devuelve crema a olla, revuelve y sirve."], trick: "Licuar mitad espesa natural y deja garbanzos camuflados.", story: "Cáscara garbanzo molesta. Licuar la mitad es salsa cremosa sin sospechas." }
+            ]
+        },
+        m3: {
+            title: "Cenas",
+            desc: "Modo supervivencia. Cenas prácticas, ligeras, ensuciando una sola sartén y a descansar.",
+            recipes: [
+                { id: 301, title: 'Sopa de los duendes', time: "15 min", tag: "Ligera", ic: "fa-hat-wizard", mod: 3, req: ["1 calabacín verde picado (sin pelar)", "1 pedacito cebolla, 1 cdta mantequilla", "Chorrito leche o crema", "Queso rallado"], steps: ["En olla, hierve calabacín y cebolla en agua (solo cubrir) 10 min.", "Pasa a licuadora con mantequilla y leche. Licúa.", "Sirve con puñadito queso rallado centro."], trick: "Chorrito leche fría directo a licuadora baja temperatura al instante.", story: "Quería algo caliente sin texturas. Dije que era sopa de duendes para ver en oscuridad." },
+                { id: 302, title: 'Omelette "Cara Feliz"', time: "10 min", tag: "Sartén", ic: "fa-face-smile", mod: 3, req: ["2 huevos", "1 tajada jamón, 1 tajada queso", "Mantequilla"], steps: ["Bate huevos y pon en sartén a fuego bajo (como arepa).", "Al cuajar, pon jamón y queso sobre UNA sola mitad.", "Dobla la otra mitad por encima cerrando.", "Corta triángulos y dibuja carita salsa tomate."], trick: "Doblar huevo encierra calor. Queso se funde en segundos y queda jugoso.", story: "Me niego a descongelar carne. Con carita dibujada ya es otra cosa." },
+                { id: 303, title: 'Pizzetas calabacín sartén', time: "15 min", tag: "Pizza", ic: "fa-pizza-slice", mod: 3, req: ["1 calabacín verde grande y grueso", "Salsa tomate casera", "Queso mozzarella, Orégano"], steps: ["Corta calabacín en rodajas medianas.", "En sartén fuego medio con hilo aceite, dora un lado 3 min.", "Voltea. Pon gota salsa, queso y orégano.", "Tapa sartén un par de minutos hasta derretir."], trick: "Antes de poner en sartén, SÉCALAS bien con papel cocina. Mojadas no doran.", story: "Pedían pizza 7:30pm. Corté rodajas y armé mini pizzas. Riquísimas." },
+                { id: 304, title: 'Quesadillas frijol aguacate', time: "10 min", tag: "Sobras", ic: "fa-recycle", mod: 3, req: ["2 tortillas harina o maíz", "½ taza frijoles cocidos sobrantes", "¼ aguacate", "Queso rápido de fundir"], steps: ["Espicha frijoles y aguacate con tenedor hasta puré.", "En tortilla, unta frijol, aguacate y queso.", "Cierra con la otra o dobla.", "Tuesta en plancha por ambos lados."], trick: "Frijoles deben quedar en puré. Enteros se ruedan al morder y caen.", story: "El magnesio ayuda a relajarlos antes de dormir. Yo no se los digo, pero lo sé." },
+                { id: 305, title: 'Rollitos pan (Sushi falso)', time: "5 min", tag: "Sin luz", ic: "fa-ban", mod: 3, req: ["2 tajadas pan molde", "Queso crema", "Jamón de pavo, 1 rebanada queso"], steps: ["Corta bordes pan. Aplasta con rodillo hasta quedar delgadito.", "Unta queso crema, pon jamón y enrolla.", "Corta rodajitas como sushi."], trick: "Queso crema es pegante. Pon extra en borde final antes de cerrar para que selle.", story: "Se fue la luz a la hora de cenar. Me inventé esto a oscuras." },
+                { id: 306, title: 'Arepas rellenas de todo', time: "10 min", tag: "Nevera", ic: "fa-broom", mod: 3, req: ["Arepas delgadas listas", "Sobras proteína muy picadas", "1 cda mayonesa o suero", "Queso rallado"], steps: ["Calienta arepa hasta inflar y abrir por mitad.", "Mezcla sobras con mayonesa y queso.", "Rellena generosamente y devuelve al calor 1 min."], trick: "Mezclar el relleno con algo húmedo evita que la arepa quede seca y desbarate.", story: "Abres nevera y hay poquitos. Pícalo todo y metes dentro de arepa." },
+                { id: 307, title: 'Sopita fideos de abuelas', time: "15 min", tag: "Caldo", ic: "fa-heart", mod: 3, req: ["1 taza caldo pollo", "Puñado fideos delgados", "Pedacito papa cubos finos, Cilantro"], steps: ["Pon a hervir caldo. Agrega papa 5 minutos.", "Echa fideos, en 3-4 minutos están listos.", "Apaga, tira cilantro picado y sirve tibio."], trick: "Fideos directos al caldo absorben sabor y almidón espesa natural.", story: "Hijo resfriado. Las abuelas tienen razón: caldo caliente con fideos arregla." },
+                { id: 308, title: 'Trocitos pollo dulce', time: "15 min", tag: "Dulce", ic: "fa-candy-cane", mod: 3, req: ["½ pechuga en cuadros", "Sal y toque mantequilla", "2 cdas puré manzana sin azúcar"], steps: ["Dora trocitos pollo en sartén con mantequilla.", "Calienta puré segundos en microondas.", "Sirve en recipiente al lado para dipear."], trick: "La salsa va aparte. A los niños les encanta la acción de untar.", story: "Tenía frasco puré manzana olvidado, lo usé como salsa. Éxito." },
+                { id: 309, title: 'Sándwich aplastado panadería', time: "10 min", tag: "Panini", ic: "fa-mug-saucer", mod: 3, req: ["Pan de tu elección", "Queso tajado (dos tipos), Jamón", "Mantequilla"], steps: ["Arma sándwich con queso tocando el pan.", "Unta mantequilla por fuera. Pon en sartén fuego medio.", "Coloca OLLA PESADA encima para aplastar.", "Voltea, repite y saca dorado."], trick: "La olla pesada presiona ingredientes, funde queso uniforme y hace pan crujiente.", story: "Sándwich normal de noche es aburrido. Aplastado y tostado es especial." },
+                { id: 310, title: 'Tortitas planas de brócoli', time: "15 min", tag: "Verde", ic: "fa-leaf", mod: 3, req: ["1 taza brócoli cocido", "1 huevo, 2 cdas queso parmesano", "1 cda avena o pan rallado"], steps: ["Destroza brócoli con tenedor sin grumos grandes.", "Mezcla con huevo, queso y avena.", "En sartén con poco aceite, aplástalas bien delgadas y dora 3 min."], trick: "Tienen que quedar muy delgadas. Gruesas se siente textura vegetal.", story: "Guardé el brócoli del almuerzo. Machaqué con huevo y queso. Se lo comió viendo tv." }
+            ]
+        }
+    };
+
+    // LOGICA DE LA APP 
+    const views = document.querySelectorAll('.view');
+    const topBar = document.getElementById('top-bar');
+    const appWrapper = document.getElementById('app-container');
+    let currentRecipeId = null;
+
+    // FAVORITOS LOGIC
+    let favorites = JSON.parse(localStorage.getItem('respiraMamaFavs')) || [];
+
+    function updateFavoritesSection() {
+        const favSection = document.getElementById('fav-section');
+        const favContainer = document.getElementById('fav-container');
+        
+        if (favorites.length === 0) {
+            favSection.classList.remove('show');
+            return;
+        }
+
+        favSection.classList.add('show');
+        favContainer.innerHTML = '';
+
+        // Buscar cada receta favorita en los módulos
+        favorites.forEach(favId => {
+            let foundRecipe = null;
+            let foundMod = null;
+            
+            for (let m = 1; m <= 3; m++) {
+                const r = db['m'+m].recipes.find(rec => rec.id === favId);
+                if(r) { foundRecipe = r; foundMod = m; break; }
+            }
+
+            if(foundRecipe) {
+                const visual = modVisuals[foundMod];
+                const card = document.createElement('div');
+                card.className = 'fav-card';
+                card.onclick = () => openRecipe(foundMod, foundRecipe.id);
+                card.innerHTML = `
+                    <div class="fav-icon" style="background: ${visual.grad}; box-shadow: 0 4px 10px ${visual.shadow};">
+                        <i class="fa-solid ${foundRecipe.ic}"></i>
+                    </div>
+                    <h4>${foundRecipe.title}</h4>
+                `;
+                favContainer.appendChild(card);
+            }
+        });
+    }
+
+    // Inicializar favoritos al cargar
+    updateFavoritesSection();
+
+    function toggleFavorite() {
+        if(!currentRecipeId) return;
+        
+        const btn = document.getElementById('fav-btn');
+        const index = favorites.indexOf(currentRecipeId);
+        
+        if (index > -1) {
+            favorites.splice(index, 1); // Quitar
+            btn.classList.remove('active');
+            btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+        } else {
+            favorites.push(currentRecipeId); // Agregar
+            btn.classList.add('active');
+            btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+        }
+        
+        localStorage.setItem('respiraMamaFavs', JSON.stringify(favorites));
+        updateFavoritesSection();
+    }
+
+    function checkFavoriteStatus(recipeId) {
+        const btn = document.getElementById('fav-btn');
+        if (favorites.includes(recipeId)) {
+            btn.classList.add('active');
+            btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+        }
+    }
+
+    function updateIngredientProgress() {
+        const items = document.querySelectorAll('.ing-item');
+        const checked = document.querySelectorAll('.ing-item.checked');
+        const total = items.length;
+        const current = checked.length;
+        
+        document.getElementById('progress-text').innerText = `${current} / ${total} listos`;
+        document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+    }
+
+    function toggleStep(element) {
+        element.classList.toggle('completed');
+    }
+
+    function openModule(modId) {
+        const modKey = 'm' + modId;
+        const modData = db[modKey];
+        const visual = modVisuals[modId];
+        
+        document.getElementById('mh-title').innerText = "Módulo " + modId + ": " + modData.title;
+        document.getElementById('mh-desc').innerText = modData.desc;
+        
+        const mh = document.getElementById('mod-header-dyn');
+        mh.style.background = visual.grad;
+        
+        const listContainer = document.getElementById('recipe-list-container');
+        listContainer.innerHTML = ''; 
+
+        modData.recipes.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'recipe-item';
+            card.onclick = () => openRecipe(modId, r.id);
+            
+            card.innerHTML = `
+                <div class="recipe-icon-thumb" style="background: ${visual.grad};">
+                    <i class="fa-solid ${r.ic}"></i>
+                </div>
+                <div class="recipe-item-info">
+                    <span class="r-tag" style="color: ${visual.color}">${r.tag}</span>
+                    <h3>${r.title}</h3>
+                    <span class="r-time"><i class="fa-regular fa-clock"></i> ${r.time}</span>
+                </div>
+            `;
+            listContainer.appendChild(card);
+        });
+
+        document.getElementById('fav-btn').style.display = 'none'; // Ocultar Fav en lista
+        document.getElementById('back-text').innerText = "Volver";
+        switchView('view-module');
+        topBar.classList.add('visible');
+    }
+
+    function openRecipe(modId, recipeId) {
+        currentRecipeId = recipeId;
+        const modKey = 'm' + modId;
+        const recipe = db[modKey].recipes.find(r => r.id === recipeId);
+        const visual = modVisuals[modId];
+        
+        appWrapper.style.setProperty('--theme-grad', visual.grad);
+        appWrapper.style.setProperty('--theme-color', visual.color);
+        appWrapper.style.setProperty('--theme-light', visual.light);
+        appWrapper.style.setProperty('--theme-shadow', visual.shadow);
+
+        const heroBg = document.getElementById('rec-hero-bg');
+        heroBg.style.background = visual.grad;
+        heroBg.innerHTML = `
+            <div class="hero-decor-1"></div>
+            <div class="hero-decor-2"></div>
+            <div class="hero-icon-bg"><i class="fa-solid ${recipe.ic}"></i></div>
+        `;
+        
+        document.getElementById('rec-title').innerText = recipe.title;
+        document.getElementById('rec-story').innerText = recipe.story;
+        
+        document.getElementById('rec-pills').innerHTML = `
+            <div class="pill"><i class="fa-regular fa-clock"></i> ${recipe.time}</div>
+            <div class="pill"><i class="fa-solid fa-star"></i> ${recipe.tag}</div>
+        `;
+
+        // INGREDIENTES
+        const ingContainer = document.getElementById('rec-ingredients');
+        ingContainer.innerHTML = '';
+        recipe.req.forEach(ing => {
+            const item = document.createElement('div');
+            item.className = 'ing-item';
+            item.onclick = function() { this.classList.toggle('checked'); updateIngredientProgress(); };
+            item.innerHTML = `
+                <div class="ing-checkbox"><i class="fa-solid fa-check"></i></div>
+                <div class="ing-text">${ing}</div>
+            `;
+            ingContainer.appendChild(item);
+        });
+
+        // PASOS
+        const stepsContainer = document.getElementById('rec-steps');
+        stepsContainer.innerHTML = '';
+        recipe.steps.forEach((step, idx) => {
+            const item = document.createElement('div');
+            item.className = 'step-item';
+            item.onclick = function() { toggleStep(this); }; // Modo cocina
+            item.innerHTML = `
+                <div class="step-num">${idx + 1}</div>
+                <div class="step-text">${step}</div>
+            `;
+            stepsContainer.appendChild(item);
+        });
+
+        document.getElementById('trick-text').innerText = recipe.trick;
+        document.getElementById('rec-trick').classList.remove('show'); 
+
+        // Actualizar UI
+        updateIngredientProgress();
+        checkFavoriteStatus(recipeId);
+        
+        document.getElementById('fav-btn').style.display = 'block'; // Mostrar Fav
+        document.getElementById('back-text').innerText = "Recetas";
+        
+        switchView('view-recipe');
+        topBar.classList.add('visible');
+    }
+
+    function switchView(viewId) {
+        views.forEach(v => {
+            if(v.id === viewId) {
+                v.classList.remove('hidden-right', 'hidden-left');
+                v.classList.add('active');
+                v.scrollTop = 0; 
+            } else {
+                v.classList.remove('active');
+                if (viewId === 'view-home') v.classList.add('hidden-right');
+                else if (viewId === 'view-module' && v.id === 'view-home') v.classList.add('hidden-left');
+                else if (viewId === 'view-module' && v.id === 'view-recipe') v.classList.add('hidden-right');
+                else v.classList.add('hidden-left');
+            }
+        });
+    }
+
+    function goBack() {
+        const activeView = document.querySelector('.view.active').id;
+        if(activeView === 'view-recipe') {
+            document.getElementById('fav-btn').style.display = 'none';
+            document.getElementById('back-text').innerText = "Volver";
+            switchView('view-module');
+        } else if(activeView === 'view-module') {
+            switchView('view-home');
+            topBar.classList.remove('visible');
+            appWrapper.style.setProperty('--theme-color', 'var(--coral-dark)');
+        }
+    }
+
+    function toggleTrick() {
+        document.getElementById('rec-trick').classList.toggle('show');
+        setTimeout(() => {
+            const view = document.getElementById('view-recipe');
+            view.scrollTo({ top: view.scrollHeight, behavior: 'smooth' });
+        }, 150);
+    }
+</script>
+
+</body>
+</html>
