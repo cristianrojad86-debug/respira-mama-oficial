@@ -2,37 +2,37 @@ import streamlit as st
 import streamlit.components.v1 as components
 import os
 
-# Configuración básica en modo colapsado
+# Configuración básica
 st.set_page_config(
     page_title="Respira, Mamá", 
-    layout="centered", 
+    layout="wide", 
     initial_sidebar_state="collapsed"
 )
 
-# 1. El Camuflaje: Ocultamos logos, menús, padding y forzamos el alto al 100% de la pantalla
+# 1. El Camuflaje Definitivo: Destruimos el banner rojo y la cabecera
 st.markdown("""
     <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
+        /* Ocultar la cabecera y el menú superior */
+        [data-testid="stHeader"] {display: none !important;}
+        [data-testid="stToolbar"] {display: none !important;}
+        #MainMenu {display: none !important;}
         
-        /* Quitamos las márgenes blancas de Streamlit y limitamos el ancho al tamaño de un celular */
+        /* Ocultar el banner rojo de Hosted with Streamlit */
+        .viewerBadge_container {display: none !important;}
+        
+        /* Ocultar el footer */
+        footer {display: none !important;}
+        
+        /* Ajustar los márgenes para que la App ocupe toda la pantalla */
         .block-container { 
             padding: 0px !important; 
-            max-width: 430px !important;
-            margin: 0 auto !important;
+            max-width: 100% !important;
         }
         
-        /* Forzamos que la caja de la app ocupe el 100% de la pantalla sin bordes */
+        /* Forzar la caja del HTML */
         iframe {
             border: none !important;
-            height: 100vh !important; 
             width: 100% !important;
-        }
-        
-        /* Fondo gris para los bordes si lo abren en PC */
-        .stApp {
-            background-color: #D3CEC4;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -44,6 +44,5 @@ if os.path.exists(ruta):
     with open(ruta, "r", encoding="utf-8") as f:
         html_puro = f.read()
         
-    # Lanzamos tu código. 
-    # scrolling=False es el truco para que la navegación fluida de tu código original tome el control.
-    components.html(html_puro, height=850, scrolling=False)
+    # Lanzamos el código
+    components.html(html_puro, height=900, scrolling=False)
